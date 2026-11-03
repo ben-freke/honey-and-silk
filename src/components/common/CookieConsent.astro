@@ -1,0 +1,270 @@
+---
+/*
+ * Cookie consent banner, with one choice for each purpose:
+ *   - analytics: Google Analytics 4 (GA_MEASUREMENT_ID in src/utils/site.ts). Loads only after consent.
+ *   - maps:      the Google Maps embed (LocationMap.astro). Loads only after consent.
+ * The site itself sets no other cookies. "Accept all" and "Reject all" have equal weight, as the ICO expects.
+ *
+ * The choice is kept in localStorage under CONSENT_KEY as JSON: {"analytics":bool,"maps":bool}.
+ * Any element with [data-cookie-settings] opens the banner again, so the visitor can change their choice.
+ * An element with [data-cookie-grant="maps"] grants one purpose only (the map placeholder button uses this).
+ */
+import { getPermalink } from '~/utils/permalinks';
+import { GA_MEASUREMENT_ID } from '~/utils/site';
+
+const gaId = (import.meta.env.PUBLIC_GA_MEASUREMENT_ID ?? GA_MEASUREMENT_ID).trim();
+// Only production builds send data, so `npm run dev` does not add test visits to the reports.
+const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
+---
+
+<div
+  id="cookie-consent"
+  class="on-dark fixed inset-x-0 bottom-0 z-50 hidden px-4 pb-4 sm:px-6 sm:pb-6"
+  role="dialog"
+  aria-modal="false"
+  aria-labelledby="cookie-consent-title"
+  aria-describedby="cookie-consent-text"
+  data-ga-id={hasAnalytics ? gaId : undefined}
+>
+  <div
+    class="mx-auto max-w-4xl rounded-r-[2.5rem] rounded-l-lg bg-chocolate text-cream p-6 md:p-8 shadow-[0_8px_40px_rgb(59_42_32/0.35)]"
+  >
+    <div class="md:flex md:items-center md:gap-8">
+      <div class="md:flex-1">
+        <p id="cookie-consent-title" class="font-heading text-4xl leading-none mb-3">Cookies</p>
+        <p id="cookie-consent-text" class="text-sm font-light leading-relaxed text-sand">
+          {
+            hasAnalytics
+              ? 'With your permission, we use Google Analytics to see how people use our website, and Google Maps to show where we are. Both can set cookies.'
+              : 'With your permission, we use Google Maps to show where we are. Google can set cookies when the map loads.'
+          }
+          You can change your choice at any time. Read our <a
+            href={`${getPermalink('/privacy')}#cookies`}
+            class="text-cream underline underline-offset-4 hover:text-gold">privacy notice</a
+          >.
+        </p>
+      </div>
+      <div class="mt-6 md:mt-0 flex flex-col sm:flex-row md:flex-col lg:flex-row gap-3 shrink-0">
+        <button type="button" class="btn-primary py-3 px-6 text-xs" data-cookie-all="true">Accept all</button>
+        <button type="button" class="btn py-3 px-6 text-xs" data-cookie-all="false">Reject all</button>
+      </div>
+    </div>
+
+    <details class="mt-5 border-t border-gold/40 pt-4 group" data-cookie-details>
+      <summary
+        class="cursor-pointer list-none text-xs uppercase tracking-[0.3em] text-gold hover:text-cream [&::-webkit-details-marker]:hidden"
+      >
+        <span class="group-open:hidden">Choose cookies</span><span class="hidden group-open:inline">Hide choices</span>
+      </summary>
+      <fieldset class="mt-4 space-y-4">
+        <legend class="sr-only">Choose which cookies to allow</legend>
+        {
+          hasAnalytics && (
+            <label class="flex items-start gap-3 text-sm">
+              <input type="checkbox" class="mt-1 h-4 w-4 accent-gold" data-cookie-purpose="analytics" />
+              <span>
+                <span class="font-medium text-cream">Analytics</span>
+                <span class="block font-light text-sand">
+                  Google Analytics counts visits and shows us which pages are useful.
+                </span>
+              </span>
+            </label>
+          )
+        }
+        <label class="flex items-start gap-3 text-sm">
+          <input type="checkbox" class="mt-1 h-4 w-4 accent-gold" data-cookie-purpose="maps" />
+          <span>
+            <span class="font-medium text-cream">Maps</span>
+            <span class="block font-light text-sand">Google Maps shows where the salon is.</span>
+          </span>
+        </label>
+        <button type="button" class="btn py-2.5 px-6 text-xs" data-cookie-save>Save choices</button>
+      </fieldset>
+    </details>
+  </div>
+</div>
+
+<script>
+  type Purpose = 'analytics' | 'maps';
+  type Consent = Record<Purpose, boolean>;
+
+  const CONSENT_KEY = 'hs-cookie-consent';
+  const PURPOSES: Purpose[] = ['analytics', 'maps'];
+
+  function readConsent(): Consent | null {
+    try {
+      const parsed = JSON.parse(window.localStorage.getItem(CONSENT_KEY) ?? 'null');
+      if (parsed && typeof parsed === 'object') {
+        return { analytics: parsed.analytics === true, maps: parsed.maps === true };
+      }
+    } catch {
+      // Missing, invalid or blocked storage: treat as no choice yet.
+    }
+    return null;
+  }
+
+  // Keep the choice in memory too, so it still works for this page view when storage is blocked.
+  let sessionConsent: Consent | null = null;
+
+  function currentConsent(): Consent | null {
+    return readConsent() ?? sessionConsent;
+  }
+
+  function saveConsent(consent: Consent) {
+    sessionConsent = consent;
+    try {
+      window.localStorage.setItem(CONSENT_KEY, JSON.stringify(consent));
+    } catch {
+      // Storage blocked: the in-memory choice applies until the next full page load.
+    }
+  }
+
+  function banner() {
+    return document.getElementById('cookie-consent');
+  }
+
+  function gaId(): string {
+    return banner()?.dataset.gaId ?? '';
+  }
+
+  function showBanner(show: boolean) {
+    const el = banner();
+    if (!el) return;
+    el.classList.toggle('hidden', !show);
+    if (!show) return;
+    // Pre-tick the boxes to match the current choice.
+    const consent = currentConsent();
+    el.querySelectorAll<HTMLInputElement>('[data-cookie-purpose]').forEach((box) => {
+      box.checked = consent?.[box.dataset.cookiePurpose as Purpose] ?? false;
+    });
+  }
+
+  // ---- Google Analytics -------------------------------------------------------------------------------------
+
+  let analyticsLoaded = false;
+
+  function loadAnalytics(id: string) {
+    window[`ga-disable-${id}`] = false;
+    if (analyticsLoaded) {
+      window.gtag?.('consent', 'update', { analytics_storage: 'granted' });
+      return;
+    }
+    analyticsLoaded = true;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function gtag() {
+      // gtag.js reads the arguments object, not an array, so push `arguments`.
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer!.push(arguments);
+    };
+    // No advertising features. Analytics storage is granted because the visitor consented.
+    window.gtag('consent', 'default', {
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      analytics_storage: 'granted',
+    });
+    window.gtag('js', new Date());
+    // GA4 enhanced measurement counts view-transition navigations as page views (browser history events).
+    window.gtag('config', id);
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
+    document.head.appendChild(script);
+  }
+
+  function stopAnalytics(id: string) {
+    window[`ga-disable-${id}`] = true;
+    window.gtag?.('consent', 'update', { analytics_storage: 'denied' });
+    // Remove the Google Analytics cookies (_ga and _ga_<container>) that are already set.
+    const host = window.location.hostname;
+    const domains = ['', host, `.${host}`, `.${host.replace(/^www\./, '')}`];
+    document.cookie.split(';').forEach((cookie) => {
+      const name = cookie.split('=')[0].trim();
+      if (name === '_ga' || name.startsWith('_ga_')) {
+        domains.forEach((domain) => {
+          document.cookie = `${name}=; Max-Age=0; path=/${domain ? `; domain=${domain}` : ''}`;
+        });
+      }
+    });
+  }
+
+  // ---- Google Maps ------------------------------------------------------------------------------------------
+
+  function applyMaps(allowed: boolean) {
+    document.querySelectorAll<HTMLElement>('[data-consent-map]').forEach((map) => {
+      const frame = map.querySelector<HTMLIFrameElement>('iframe[data-src]');
+      const placeholder = map.querySelector<HTMLElement>('[data-consent-placeholder]');
+      if (!frame) return;
+      if (allowed) {
+        if (!frame.getAttribute('src')) frame.setAttribute('src', frame.dataset.src ?? '');
+        frame.classList.remove('hidden');
+        placeholder?.classList.add('hidden');
+      } else {
+        frame.removeAttribute('src');
+        frame.classList.add('hidden');
+        placeholder?.classList.remove('hidden');
+      }
+    });
+  }
+
+  // ---- Apply and choose -------------------------------------------------------------------------------------
+
+  function applyConsent() {
+    const consent = currentConsent();
+    const id = gaId();
+    if (id) {
+      if (consent?.analytics) loadAnalytics(id);
+      else if (analyticsLoaded || document.cookie.includes('_ga')) stopAnalytics(id);
+    }
+    applyMaps(consent?.maps === true);
+  }
+
+  function choose(consent: Consent) {
+    saveConsent(consent);
+    showBanner(false);
+    applyConsent();
+  }
+
+  // One delegated listener survives Astro view transitions, which replace the page body.
+  document.addEventListener('click', (event) => {
+    const target = event.target as Element | null;
+    if (!target) return;
+
+    const all = target.closest<HTMLElement>('[data-cookie-all]')?.dataset.cookieAll;
+    if (all === 'true' || all === 'false') {
+      const value = all === 'true';
+      choose(Object.fromEntries(PURPOSES.map((p) => [p, value])) as Consent);
+      return;
+    }
+
+    if (target.closest('[data-cookie-save]')) {
+      const consent: Consent = { analytics: false, maps: false };
+      banner()
+        ?.querySelectorAll<HTMLInputElement>('[data-cookie-purpose]')
+        .forEach((box) => {
+          consent[box.dataset.cookiePurpose as Purpose] = box.checked;
+        });
+      choose(consent);
+      return;
+    }
+
+    const grant = target.closest<HTMLElement>('[data-cookie-grant]')?.dataset.cookieGrant as Purpose | undefined;
+    if (grant && PURPOSES.includes(grant)) {
+      const consent = currentConsent() ?? { analytics: false, maps: false };
+      choose({ ...consent, [grant]: true });
+      return;
+    }
+
+    if (target.closest('[data-cookie-settings]')) {
+      event.preventDefault();
+      showBanner(true);
+      banner()?.querySelector<HTMLElement>('[data-cookie-all]')?.focus();
+    }
+  });
+
+  // Runs on the first load and after each view-transition navigation.
+  document.addEventListener('astro:page-load', () => {
+    showBanner(currentConsent() === null);
+    applyConsent();
+  });
+</script>

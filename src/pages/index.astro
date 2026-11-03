@@ -1,0 +1,102 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import Button from '~/components/ui/Button.astro';
+import Features2 from '~/components/widgets/Features2.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+import LocationMap from '~/components/LocationMap.astro';
+import { BUSINESS, SERVICES } from '~/utils/site';
+
+const metadata = {
+  title: 'Honey & Silk Hair | Hairdressing Salon in Tewkesbury',
+  ignoreTitleTemplate: true,
+};
+---
+
+<Layout metadata={metadata}>
+  <!-- Hero -->
+  <section class="not-prose">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-16 pb-20 md:pt-28 md:pb-32 text-center">
+      <p class="eyebrow mb-6">Opening 30th November in Tewkesbury</p>
+      <h1 class="font-heading text-heading text-5xl sm:text-6xl md:text-8xl leading-[1.1]">
+        Welcome to Honey &amp; Silk
+      </h1>
+      <p class="max-w-2xl mx-auto mt-6 text-lg md:text-xl font-light leading-relaxed text-muted">
+        A new salon from a stylist with 16 years of experience, created so you feel truly special from the moment you
+        walk through the door.
+      </p>
+      <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center max-w-xs sm:max-w-none mx-auto">
+        <Button variant="primary" href="/contact" text="Book an appointment" />
+        <Button href="/services" text="See our services" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Story: sand band with a script pull quote. -->
+  <section class="not-prose bg-sand">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-20 md:py-28 grid gap-12 md:grid-cols-5 md:items-center">
+      <div class="md:col-span-2 text-center md:text-left">
+        <p class="font-heading text-[7rem] md:text-[9rem] leading-none text-chocolate">16</p>
+        <p class="mt-2 text-xs uppercase tracking-[0.3em] text-chocolate">Years behind the chair</p>
+      </div>
+      <div class="md:col-span-3">
+        <p class="font-heading text-4xl md:text-5xl leading-snug text-chocolate">
+          Every little detail has been created with love, care and thought.
+        </p>
+        <p class="mt-6 text-lg font-light leading-relaxed text-chocolate">
+          After 16 years of cutting hair, building connections and doing what I love, I have opened my very own salon.
+          At the heart of it all is one thing: making you feel truly special.
+        </p>
+        <a
+          href="/about"
+          class="inline-block mt-6 text-xs uppercase tracking-[0.3em] text-chocolate underline decoration-chocolate/40 underline-offset-8 hover:decoration-chocolate"
+          >Our story</a
+        >
+      </div>
+    </div>
+  </section>
+
+  <Features2
+    id="services"
+    tagline="What we do"
+    title="Our services"
+    items={SERVICES.map((s) => ({ title: s.title, description: s.description, icon: s.icon }))}
+    columns={2}
+    classes={{ container: 'max-w-5xl' }}
+  />
+
+  <!-- Visit: address and opening hours. -->
+  <section class="not-prose">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 pb-20 md:pb-28">
+      <div class="swatch border border-gold/60 grid md:grid-cols-2 gap-10 p-8 md:p-14">
+        <div>
+          <p class="eyebrow mb-4">Find us</p>
+          <h2 class="font-heading text-5xl md:text-6xl leading-[1.1] mb-6">Visit the salon</h2>
+          <address class="not-italic text-lg font-light leading-relaxed">
+            {BUSINESS.address.map((line) => <div>{line}</div>)}
+          </address>
+        </div>
+        <div>
+          <h3 class="text-xs uppercase tracking-[0.3em] text-mocha mb-4 md:mt-2">Opening hours</h3>
+          <dl class="divide-y divide-gold/40">
+            {
+              BUSINESS.openingHours.map((h) => (
+                <div class="flex justify-between gap-4 py-3">
+                  <dt class="font-medium">{h.days}</dt>
+                  <dd class="font-light text-right">{h.hours}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+        <LocationMap class="md:col-span-2" />
+      </div>
+    </div>
+  </section>
+
+  <CallToAction
+    tagline="Book your visit"
+    title="Ready for a fresh look?"
+    subtitle="Get in touch to book your next appointment."
+    actions={[{ variant: 'primary', text: 'Contact us', href: '/contact' }]}
+  />
+</Layout>

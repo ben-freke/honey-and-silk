@@ -1,0 +1,36 @@
+site:
+  name: Honey & Silk Hair
+  site: 'https://honeyandsilk.co.uk'
+  base: '/'
+  trailingSlash: false
+
+metadata:
+  title:
+    default: Honey & Silk Hair
+    template: '%s | Honey & Silk Hair'
+  description: 'Honey & Silk Hair is a new hairdressing salon at 4a Barton Street, Tewkesbury, opening 30 November.'
+  robots:
+    index: true
+    follow: true
+  openGraph:
+    site_name: Honey & Silk Hair
+    type: website
+
+i18n:
+  language: en
+  textDirection: ltr
+
+apps:
+  blog:
+    isEnabled: false
+    post:
+      isEnabled: false
+    list:
+      isEnabled: false
+    category:
+      isEnabled: false
+    tag:
+      isEnabled: false
+
+ui:
+  theme: 'light:only'

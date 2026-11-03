@@ -1,0 +1,74 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+import ContactForm from '~/components/widgets/Contact.astro';
+import LocationMap from '~/components/LocationMap.astro';
+import { BUSINESS } from '~/utils/site';
+
+const metadata = { title: 'Contact Us' };
+---
+
+<Layout metadata={metadata}>
+  <Hero
+    tagline="Contact us"
+    title="Book or ask a question"
+    subtitle="Find us at 4a Barton Street, Tewkesbury. We officially open on Monday 30 November."
+  />
+
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 pb-8">
+    <LocationMap class="mb-10" />
+  </section>
+
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 pb-8">
+    <div class="swatch bg-sand grid gap-10 md:grid-cols-3 p-8 md:p-12 text-center md:text-left">
+      <div>
+        <h2 class="text-xs font-medium uppercase tracking-[0.3em] mb-4">Visit</h2>
+        <address class="not-italic font-light leading-relaxed">
+          {BUSINESS.address.map((line) => <div>{line}</div>)}
+        </address>
+      </div>
+      <div>
+        <h2 class="text-xs font-medium uppercase tracking-[0.3em] mb-4">Call or email</h2>
+        <p>
+          <a
+            class="underline decoration-chocolate/40 underline-offset-4 hover:decoration-chocolate"
+            href={`tel:${BUSINESS.phoneHref}`}>{BUSINESS.phoneDisplay}</a
+          >
+        </p>
+        <p>
+          <a
+            class="underline decoration-chocolate/40 underline-offset-4 hover:decoration-chocolate"
+            href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a
+          >
+        </p>
+      </div>
+      <div>
+        <h2 class="text-xs font-medium uppercase tracking-[0.3em] mb-4">Opening hours</h2>
+        <ul class="font-light leading-relaxed">
+          {
+            BUSINESS.openingHours.map((h) => (
+              <li>
+                {h.days}: {h.hours}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <ContactForm
+    title="Send us a message"
+    inputs={[
+      { type: 'text', name: 'name', label: 'Name' },
+      { type: 'email', name: 'email', label: 'Email' },
+      { type: 'tel', name: 'phone', label: 'Phone' },
+    ]}
+    textarea={{ label: 'Message', name: 'message', rows: 4 }}
+    disclaimer={{
+      label:
+        'We use your details only to reply to your message. Read our <a href="/privacy" class="underline underline-offset-4">privacy notice</a>.',
+    }}
+    button="Send message"
+  />
+</Layout>

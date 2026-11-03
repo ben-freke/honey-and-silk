@@ -1,0 +1,23 @@
+// Cloudflare Workers static assets config.
+// The site is fully static: `npm run build` writes it to ./dist, and `wrangler deploy` uploads that folder.
+// Cloudflare applies public/_headers (copied to dist/_headers) to every response.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "honey-and-silk",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    // Serve dist/404.html with a 404 status for unknown paths.
+    "not_found_handling": "404-page",
+    // Astro is set to trailingSlash: false and builds /about/index.html, so serve /about without a redirect.
+    "html_handling": "drop-trailing-slash",
+  },
+  // The site has no Worker code, so it does not need observability or a `main` entry.
+  //
+  // Custom domain: uncomment when honeyandsilk.co.uk is a zone in the same Cloudflare account.
+  // Until then, the site is at https://honey-and-silk.<your-subdomain>.workers.dev
+  // "routes": [
+  //   { "pattern": "honeyandsilk.co.uk", "custom_domain": true },
+  //   { "pattern": "www.honeyandsilk.co.uk", "custom_domain": true },
+  // ],
+}

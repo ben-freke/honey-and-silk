@@ -1,0 +1,63 @@
+---
+import '@fontsource/great-vibes/400.css';
+import '@fontsource/lexend/300.css';
+import '@fontsource/lexend/400.css';
+import '@fontsource/lexend/500.css';
+import '@fontsource/lexend/600.css';
+---
+
+<style is:inline>
+  /*
+   * Honey & Silk Hair brand tokens, from "Basic H&S brand guide.pdf".
+   *
+   * Palette
+   *   Lead colours:      chocolate #3B2A20, cream #FEF9D5
+   *   Headings & copy:   chocolate, mocha #7C614E, cream
+   *   Complimentary:     gold #B09966, sand #EAD9B3
+   *
+   * Softened palette: at the owner's request, some brand colours are mixed toward white.
+   *   chocolate  #3B2A20                 (original brand colour, not changed)
+   *   mocha      #7C614E +  4% white = #816755  (text colour, so only a small change)
+   *   gold       #B09966 + 20% white = #C0AD85
+   *   sand       #EAD9B3 + 30% white = #F0E4CA
+   *   cream      #FEF9D5 + 45% white = #FEFCE8  (page background)
+   *
+   * Contrast rules (WCAG AA):
+   *   - Chocolate text on cream (13.2:1) or sand (10.8:1): OK for all text.
+   *   - Mocha text on cream (5.1:1): OK for all text. Mocha on sand (4.2:1): large text and icons only.
+   *   - Cream, sand (10.8:1) or gold (6.2:1) text on chocolate: OK for all text.
+   *   - Gold on cream or sand: decoration only (rules, borders). Do not use for text.
+   *
+   * Fonts
+   *   Titles, headings and impact words: Great Vibes.
+   *   Subheadings and body text: Garet. Garet is a commercial font. Lexend is the open fallback until
+   *   licensed Garet web font files are added.
+   */
+  :root {
+    --hs-chocolate: 59 42 32;
+    --hs-mocha: 129 103 85;
+    --hs-gold: 192 173 133;
+    --hs-sand: 240 228 202;
+    --hs-cream: 254 252 232;
+
+    --aw-font-sans: 'Garet', 'Lexend', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+    --aw-font-serif: var(--aw-font-sans);
+    --aw-font-heading: 'Great Vibes', 'Brush Script MT', cursive;
+
+    --aw-color-primary: rgb(var(--hs-chocolate));
+    --aw-color-secondary: rgb(var(--hs-mocha));
+    --aw-color-accent: rgb(var(--hs-gold));
+
+    --aw-color-text-heading: rgb(var(--hs-chocolate));
+    --aw-color-text-default: rgb(var(--hs-chocolate));
+    --aw-color-text-muted: rgb(var(--hs-mocha));
+    --aw-color-text-page: rgb(var(--hs-chocolate));
+    --aw-color-bg-page: rgb(var(--hs-cream));
+    --aw-color-bg-page-dark: rgb(var(--hs-chocolate));
+
+    ::selection {
+      background-color: rgb(var(--hs-sand));
+      color: rgb(var(--hs-chocolate));
+    }
+  }
+</style>

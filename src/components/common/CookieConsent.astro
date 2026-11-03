@@ -1,13 +1,13 @@
 ---
 /*
- * Cookie consent banner, with one choice for each purpose:
- *   - analytics: Google Analytics 4 (GA_MEASUREMENT_ID in src/utils/site.ts). Loads only after consent.
- *   - maps:      the Google Maps embed (LocationMap.astro). Loads only after consent.
- * The site itself sets no other cookies. "Accept all" and "Reject all" have equal weight, as the ICO expects.
+ * Cookie consent banner: one choice, "Accept cookies" or "Reject cookies".
  *
- * The choice is kept in localStorage under CONSENT_KEY as JSON: {"analytics":bool,"maps":bool}.
+ *   Accept: loads Google Analytics 4 (GA_MEASUREMENT_ID in src/utils/site.ts) and shows the Google Maps embed.
+ *   Reject: closes the banner. Google Analytics stays off (and its cookies are deleted), and the map is hidden.
+ * Until the visitor chooses, neither loads. The page stays usable behind the banner.
+ *
+ * The choice is kept in localStorage under CONSENT_KEY ("accepted" or "rejected").
  * Any element with [data-cookie-settings] opens the banner again, so the visitor can change their choice.
- * An element with [data-cookie-grant="maps"] grants one purpose only (the map placeholder button uses this).
  */
 import { getPermalink } from '~/utils/permalinks';
 import { GA_MEASUREMENT_ID } from '~/utils/site';
@@ -20,100 +20,51 @@ const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
 <div
   id="cookie-consent"
   class="on-dark fixed inset-x-0 bottom-0 z-50 hidden px-4 pb-4 sm:px-6 sm:pb-6"
-  role="dialog"
-  aria-modal="false"
-  aria-labelledby="cookie-consent-title"
-  aria-describedby="cookie-consent-text"
+  role="region"
+  aria-label="Cookies"
   data-ga-id={hasAnalytics ? gaId : undefined}
 >
   <div
-    class="mx-auto max-w-4xl rounded-r-[2.5rem] rounded-l-lg bg-chocolate text-cream p-6 md:p-8 shadow-[0_8px_40px_rgb(59_42_32/0.35)]"
+    class="mx-auto max-w-3xl rounded-r-[2.5rem] rounded-l-lg bg-chocolate text-cream px-6 py-5 md:px-8 shadow-[0_8px_40px_rgb(59_42_32/0.35)] md:flex md:items-center md:gap-8"
   >
-    <div class="md:flex md:items-center md:gap-8">
-      <div class="md:flex-1">
-        <p id="cookie-consent-title" class="font-heading text-4xl leading-none mb-3">Cookies</p>
-        <p id="cookie-consent-text" class="text-sm font-light leading-relaxed text-sand">
-          {
-            hasAnalytics
-              ? 'With your permission, we use Google Analytics to see how people use our website, and Google Maps to show where we are. Both can set cookies.'
-              : 'With your permission, we use Google Maps to show where we are. Google can set cookies when the map loads.'
-          }
-          You can change your choice at any time. Read our <a
-            href={`${getPermalink('/privacy')}#cookies`}
-            class="text-cream underline underline-offset-4 hover:text-gold">privacy notice</a
-          >.
-        </p>
-      </div>
-      <div class="mt-6 md:mt-0 flex flex-col sm:flex-row md:flex-col lg:flex-row gap-3 shrink-0">
-        <button type="button" class="btn-primary py-3 px-6 text-xs" data-cookie-all="true">Accept all</button>
-        <button type="button" class="btn py-3 px-6 text-xs" data-cookie-all="false">Reject all</button>
-      </div>
+    <p class="text-sm font-light leading-relaxed text-sand md:flex-1">
+      We use cookies on this website. Check our <a
+        href={getPermalink('/privacy')}
+        class="text-cream underline underline-offset-4 hover:text-gold">privacy policy</a
+      >.
+    </p>
+    <div class="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3 shrink-0">
+      <button type="button" class="btn-primary py-3 px-6 text-xs" data-cookie-choice="accepted">Accept cookies</button>
+      <button type="button" class="btn py-3 px-6 text-xs" data-cookie-choice="rejected">Reject cookies</button>
     </div>
-
-    <details class="mt-5 border-t border-gold/40 pt-4 group" data-cookie-details>
-      <summary
-        class="cursor-pointer list-none text-xs uppercase tracking-[0.3em] text-gold hover:text-cream [&::-webkit-details-marker]:hidden"
-      >
-        <span class="group-open:hidden">Choose cookies</span><span class="hidden group-open:inline">Hide choices</span>
-      </summary>
-      <fieldset class="mt-4 space-y-4">
-        <legend class="sr-only">Choose which cookies to allow</legend>
-        {
-          hasAnalytics && (
-            <label class="flex items-start gap-3 text-sm">
-              <input type="checkbox" class="mt-1 h-4 w-4 accent-gold" data-cookie-purpose="analytics" />
-              <span>
-                <span class="font-medium text-cream">Analytics</span>
-                <span class="block font-light text-sand">
-                  Google Analytics counts visits and shows us which pages are useful.
-                </span>
-              </span>
-            </label>
-          )
-        }
-        <label class="flex items-start gap-3 text-sm">
-          <input type="checkbox" class="mt-1 h-4 w-4 accent-gold" data-cookie-purpose="maps" />
-          <span>
-            <span class="font-medium text-cream">Maps</span>
-            <span class="block font-light text-sand">Google Maps shows where the salon is.</span>
-          </span>
-        </label>
-        <button type="button" class="btn py-2.5 px-6 text-xs" data-cookie-save>Save choices</button>
-      </fieldset>
-    </details>
   </div>
 </div>
 
 <script>
-  type Purpose = 'analytics' | 'maps';
-  type Consent = Record<Purpose, boolean>;
+  type Consent = 'accepted' | 'rejected' | null;
 
   const CONSENT_KEY = 'hs-cookie-consent';
-  const PURPOSES: Purpose[] = ['analytics', 'maps'];
 
-  function readConsent(): Consent | null {
+  function readConsent(): Consent {
     try {
-      const parsed = JSON.parse(window.localStorage.getItem(CONSENT_KEY) ?? 'null');
-      if (parsed && typeof parsed === 'object') {
-        return { analytics: parsed.analytics === true, maps: parsed.maps === true };
-      }
+      const value = window.localStorage.getItem(CONSENT_KEY);
+      return value === 'accepted' || value === 'rejected' ? value : null;
     } catch {
-      // Missing, invalid or blocked storage: treat as no choice yet.
+      return null;
     }
-    return null;
   }
 
   // Keep the choice in memory too, so it still works for this page view when storage is blocked.
-  let sessionConsent: Consent | null = null;
+  let sessionConsent: Consent = null;
 
-  function currentConsent(): Consent | null {
+  function currentConsent(): Consent {
     return readConsent() ?? sessionConsent;
   }
 
-  function saveConsent(consent: Consent) {
-    sessionConsent = consent;
+  function saveConsent(value: Exclude<Consent, null>) {
+    sessionConsent = value;
     try {
-      window.localStorage.setItem(CONSENT_KEY, JSON.stringify(consent));
+      window.localStorage.setItem(CONSENT_KEY, value);
     } catch {
       // Storage blocked: the in-memory choice applies until the next full page load.
     }
@@ -123,20 +74,8 @@ const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
     return document.getElementById('cookie-consent');
   }
 
-  function gaId(): string {
-    return banner()?.dataset.gaId ?? '';
-  }
-
   function showBanner(show: boolean) {
-    const el = banner();
-    if (!el) return;
-    el.classList.toggle('hidden', !show);
-    if (!show) return;
-    // Pre-tick the boxes to match the current choice.
-    const consent = currentConsent();
-    el.querySelectorAll<HTMLInputElement>('[data-cookie-purpose]').forEach((box) => {
-      box.checked = consent?.[box.dataset.cookiePurpose as Purpose] ?? false;
-    });
+    banner()?.classList.toggle('hidden', !show);
   }
 
   // ---- Google Analytics -------------------------------------------------------------------------------------
@@ -156,7 +95,7 @@ const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
       // eslint-disable-next-line prefer-rest-params
       window.dataLayer!.push(arguments);
     };
-    // No advertising features. Analytics storage is granted because the visitor consented.
+    // No advertising features. Analytics storage is granted because the visitor accepted cookies.
     window.gtag('consent', 'default', {
       ad_storage: 'denied',
       ad_user_data: 'denied',
@@ -190,19 +129,16 @@ const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
 
   // ---- Google Maps ------------------------------------------------------------------------------------------
 
-  function applyMaps(allowed: boolean) {
+  // Show and load the map only after the visitor accepts. Otherwise hide it and remove its src.
+  function applyMaps(accepted: boolean) {
     document.querySelectorAll<HTMLElement>('[data-consent-map]').forEach((map) => {
       const frame = map.querySelector<HTMLIFrameElement>('iframe[data-src]');
-      const placeholder = map.querySelector<HTMLElement>('[data-consent-placeholder]');
-      if (!frame) return;
-      if (allowed) {
-        if (!frame.getAttribute('src')) frame.setAttribute('src', frame.dataset.src ?? '');
-        frame.classList.remove('hidden');
-        placeholder?.classList.add('hidden');
+      if (accepted) {
+        if (frame && !frame.getAttribute('src')) frame.setAttribute('src', frame.dataset.src ?? '');
+        map.classList.remove('hidden');
       } else {
-        frame.removeAttribute('src');
-        frame.classList.add('hidden');
-        placeholder?.classList.remove('hidden');
+        frame?.removeAttribute('src');
+        map.classList.add('hidden');
       }
     });
   }
@@ -210,19 +146,13 @@ const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
   // ---- Apply and choose -------------------------------------------------------------------------------------
 
   function applyConsent() {
-    const consent = currentConsent();
-    const id = gaId();
+    const accepted = currentConsent() === 'accepted';
+    const id = banner()?.dataset.gaId ?? '';
     if (id) {
-      if (consent?.analytics) loadAnalytics(id);
+      if (accepted) loadAnalytics(id);
       else if (analyticsLoaded || document.cookie.includes('_ga')) stopAnalytics(id);
     }
-    applyMaps(consent?.maps === true);
-  }
-
-  function choose(consent: Consent) {
-    saveConsent(consent);
-    showBanner(false);
-    applyConsent();
+    applyMaps(accepted);
   }
 
   // One delegated listener survives Astro view transitions, which replace the page body.
@@ -230,35 +160,18 @@ const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
     const target = event.target as Element | null;
     if (!target) return;
 
-    const all = target.closest<HTMLElement>('[data-cookie-all]')?.dataset.cookieAll;
-    if (all === 'true' || all === 'false') {
-      const value = all === 'true';
-      choose(Object.fromEntries(PURPOSES.map((p) => [p, value])) as Consent);
-      return;
-    }
-
-    if (target.closest('[data-cookie-save]')) {
-      const consent: Consent = { analytics: false, maps: false };
-      banner()
-        ?.querySelectorAll<HTMLInputElement>('[data-cookie-purpose]')
-        .forEach((box) => {
-          consent[box.dataset.cookiePurpose as Purpose] = box.checked;
-        });
-      choose(consent);
-      return;
-    }
-
-    const grant = target.closest<HTMLElement>('[data-cookie-grant]')?.dataset.cookieGrant as Purpose | undefined;
-    if (grant && PURPOSES.includes(grant)) {
-      const consent = currentConsent() ?? { analytics: false, maps: false };
-      choose({ ...consent, [grant]: true });
+    const choice = target.closest<HTMLElement>('[data-cookie-choice]')?.dataset.cookieChoice;
+    if (choice === 'accepted' || choice === 'rejected') {
+      saveConsent(choice);
+      showBanner(false);
+      applyConsent();
       return;
     }
 
     if (target.closest('[data-cookie-settings]')) {
       event.preventDefault();
       showBanner(true);
-      banner()?.querySelector<HTMLElement>('[data-cookie-all]')?.focus();
+      banner()?.querySelector<HTMLElement>('[data-cookie-choice]')?.focus();
     }
   });
 

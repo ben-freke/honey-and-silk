@@ -1,8 +1,10 @@
 ---
 /*
- * Secondary logo from the brand guide (page 6): "Honey & Silk" in Great Vibes. The "HAIR" part is left out.
- * The header uses this text lockup because the monogram logo is too detailed at small sizes.
+ * Header logo: the primary monogram logo from the brand guide (page 3), trimmed to its edges.
  */
+import { Image } from 'astro:assets';
+import { SITE } from 'astrowind:config';
+import logo from '~/assets/images/logo.png';
 
 export interface Props {
   class?: string;
@@ -11,6 +13,10 @@ export interface Props {
 const { class: className = '' } = Astro.props;
 ---
 
-<span class:list={['inline-flex items-baseline gap-2 whitespace-nowrap', className]}>
-  <span class="font-heading text-[2rem] md:text-[2.5rem] leading-none">Honey &amp; Silk</span>
-</span>
+<Image
+  src={logo}
+  alt={SITE?.name ?? 'Honey & Silk Hair'}
+  width={240}
+  loading="eager"
+  class:list={['h-12 md:h-20 w-auto', className]}
+/>

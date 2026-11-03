@@ -4,7 +4,7 @@
 //   - A pull request uploads a preview version, and the Cloudflare app comments the preview URL on the PR.
 //   - A merge to main deploys to production.
 // Build settings in the dashboard: build command `npm run build`, deploy command `npx wrangler deploy`,
-// non-production branch deploy command `npx wrangler versions upload`.
+// non-production branch deploy command `npx wrangler preview`.
 //
 // The site is fully static. Cloudflare applies public/_headers (copied to dist/_headers) to every response.
 {
@@ -20,6 +20,9 @@
   },
   // Preview URLs for pull request builds.
   "preview_urls": true,
+  // Required by `npx wrangler preview`, which Workers Builds runs for non-production branches (pull requests).
+  // Empty means: use the top-level settings above. See https://developers.cloudflare.com/workers/previews/configuration/
+  "previews": {},
   //
   // Custom domain: uncomment when honeyandsilk.co.uk is a zone in the same Cloudflare account.
   // "routes": [

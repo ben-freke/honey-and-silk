@@ -24,8 +24,8 @@ const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroInteg
 export default defineConfig({
   site: 'https://honeyandsilk.co.uk',
   output: 'static',
-  // Build about.html, not about/index.html. Cloudflare Pages serves about.html at /about with no redirect, which
-  // matches trailingSlash: false in src/config.yaml. Directory output would make Pages redirect /about to /about/.
+  // Build about.html, not about/index.html. Cloudflare serves about.html at /about with no redirect, which matches
+  // trailingSlash: false in src/config.yaml.
   build: {
     format: 'file',
   },

@@ -43,5 +43,5 @@ jobs:
       - run: npm ci
       - run: npm run check
 
-# Deploys are not done here. The Cloudflare Pages GitHub integration builds every pull request as a preview, and
-# deploys main to production. See wrangler.jsonc.
+# Deploys are not done here. Cloudflare Workers Builds uploads a preview for every pull request, and deploys main
+# to production. See wrangler.jsonc.

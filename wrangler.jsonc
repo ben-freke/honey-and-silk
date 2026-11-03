@@ -1,14 +1,32 @@
-// Cloudflare Pages config. Pages reads this file when it builds the site from GitHub.
+// Cloudflare Workers static assets config.
 //
-// Deploys come from the Cloudflare Pages GitHub integration, set up in the Cloudflare dashboard:
-//   - Every pull request gets a preview deployment, and the Cloudflare app comments the preview URL on the PR.
+// Deploys come from Workers Builds (the Cloudflare GitHub integration, set up in the Cloudflare dashboard):
+//   - A pull request uploads a preview version, and the Cloudflare app comments the preview URL on the PR.
 //   - A merge to main deploys to production.
-// Build settings in the dashboard: framework preset "Astro", build command `npm run build`, output directory `dist`.
+// Build settings in the dashboard: build command `npm run build`, deploy command `npx wrangler deploy`,
+// non-production branch deploy command `npx wrangler preview`.
 //
-// Pages applies public/_headers (copied to dist/_headers) and serves dist/404.html for unknown paths.
+// The site is fully static. Cloudflare applies public/_headers (copied to dist/_headers) to every response.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "honey-and-silk",
   "compatibility_date": "2026-11-01",
-  "pages_build_output_dir": "./dist",
+  "assets": {
+    "directory": "./dist",
+    // Serve dist/404.html with a 404 status for unknown paths.
+    "not_found_handling": "404-page",
+    // Astro builds about.html (build.format 'file'); serve it at /about, and redirect /about/ and /about.html there.
+    "html_handling": "drop-trailing-slash",
+  },
+  // Preview URLs for pull request builds.
+  "preview_urls": true,
+  // Required by `npx wrangler preview`, which Workers Builds runs for non-production branches (pull requests).
+  // Empty means: use the top-level settings above. See https://developers.cloudflare.com/workers/previews/configuration/
+  "previews": {},
+  //
+  // Custom domain: uncomment when honeyandsilk.co.uk is a zone in the same Cloudflare account.
+  // "routes": [
+  //   { "pattern": "honeyandsilk.co.uk", "custom_domain": true },
+  //   { "pattern": "www.honeyandsilk.co.uk", "custom_domain": true },
+  // ],
 }

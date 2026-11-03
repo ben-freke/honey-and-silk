@@ -8,7 +8,7 @@ metadata:
   title:
     default: Honey & Silk Hair
     template: '%s | Honey & Silk Hair'
-  description: 'Honey & Silk Hair is a new hairdressing salon at 4a Barton Street, Tewkesbury, opening 30 November.'
+  description: 'Honey & Silk Hair is a new hairdressing salon at 4a Barton Street, Tewkesbury, opening 30th November.'
   robots:
     index: true
     follow: true

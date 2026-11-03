@@ -43,34 +43,5 @@ jobs:
       - run: npm ci
       - run: npm run check
 
-  # Deploy to Cloudflare only for pushes to main, and only after build and check pass.
-  # Needs these repository settings (Settings > Secrets and variables > Actions):
-  #   Secrets:   CLOUDFLARE_API_TOKEN  (token with "Edit Cloudflare Workers" permissions)
-  #              CLOUDFLARE_ACCOUNT_ID
-  #   Variables: PUBLIC_FORM_ENDPOINT      (optional; the contact form endpoint, built into the site)
-  #              PUBLIC_GA_MEASUREMENT_ID  (optional; overrides the GA4 ID in src/utils/site.ts)
-  deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [build, check]
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://honeyandsilk.co.uk
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-        env:
-          PUBLIC_FORM_ENDPOINT: ${{ vars.PUBLIC_FORM_ENDPOINT }}
-      - name: Deploy to Cloudflare
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # wrangler-action uses the wrangler version from package-lock.json.
-          command: deploy
+# Deploys are not done here. The Cloudflare Pages GitHub integration builds every pull request as a preview, and
+# deploys main to production. See wrangler.jsonc.

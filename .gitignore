@@ -1,0 +1,57 @@
+# build output
+dist/
+.output/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# environment variables
+.env
+.env.*
+!.env.example
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# lock files (optional - uncomment if needed)
+# pnpm-lock.yaml
+# package-lock.json
+# yarn.lock
+
+# Deployment
+.wrangler/
+.dev.vars*
+.vercel/
+.netlify/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temp files
+*.tmp
+.cache/
+.npm-cache/
+/screenshots/
+
+# Brand source files (kept locally, not published)
+reference-images/

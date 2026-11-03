@@ -16,18 +16,20 @@ const metadata = { title: 'Contact Us' };
   />
 
   <section class="max-w-5xl mx-auto px-4 sm:px-6 pb-8">
-    <LocationMap class="mb-10" />
+    <LocationMap class="mb-2" />
   </section>
 
   <section class="max-w-5xl mx-auto px-4 sm:px-6 pb-8">
-    <div class="swatch bg-sand grid gap-10 md:grid-cols-3 p-8 md:p-12 text-center md:text-left">
+    <div
+      class="swatch bg-sand grid gap-10 sm:grid-cols-2 lg:grid-cols-3 p-6 sm:p-8 md:p-12 text-center sm:text-left [overflow-wrap:anywhere]"
+    >
       <div>
         <h2 class="text-xs font-medium uppercase tracking-[0.3em] mb-4">Visit</h2>
         <address class="not-italic font-light leading-relaxed">
           {BUSINESS.address.map((line) => <div>{line}</div>)}
         </address>
       </div>
-      <div>
+      <div class="min-w-0">
         <h2 class="text-xs font-medium uppercase tracking-[0.3em] mb-4">Call or email</h2>
         <p>
           <a
@@ -37,7 +39,7 @@ const metadata = { title: 'Contact Us' };
         </p>
         <p>
           <a
-            class="underline decoration-chocolate/40 underline-offset-4 hover:decoration-chocolate"
+            class="underline decoration-chocolate/40 underline-offset-4 hover:decoration-chocolate [overflow-wrap:anywhere]"
             href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a
           >
         </p>
@@ -60,11 +62,11 @@ const metadata = { title: 'Contact Us' };
   <ContactForm
     title="Send us a message"
     inputs={[
-      { type: 'text', name: 'name', label: 'Name' },
-      { type: 'email', name: 'email', label: 'Email' },
-      { type: 'tel', name: 'phone', label: 'Phone' },
+      { type: 'text', name: 'name', label: 'Name', autocomplete: 'name', required: true, maxlength: 100 },
+      { type: 'email', name: 'email', label: 'Email', autocomplete: 'email', required: true, maxlength: 254 },
+      { type: 'tel', name: 'phone', label: 'Phone', autocomplete: 'tel', maxlength: 30 },
     ]}
-    textarea={{ label: 'Message', name: 'message', rows: 4 }}
+    textarea={{ label: 'Message', name: 'message', rows: 4, required: true, maxlength: 2000 }}
     disclaimer={{
       label:
         'We use your details only to reply to your message. Read our <a href="/privacy" class="underline underline-offset-4">privacy notice</a>.',

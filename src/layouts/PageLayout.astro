@@ -15,10 +15,15 @@ const { metadata } = Astro.props;
 ---
 
 <Layout metadata={metadata}>
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-chocolate focus:px-6 focus:py-3 focus:text-sm focus:text-cream"
+    >Skip to main content</a
+  >
   <slot name="header">
     <Header {...headerData} isSticky />
   </slot>
-  <main>
+  <main id="main" tabindex="-1" class="focus:outline-none">
     <slot />
   </main>
   <slot name="footer">

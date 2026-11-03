@@ -1,7 +1,11 @@
 ---
 /*
- * Google Maps embed. Google can set cookies, so the whole map is hidden and the iframe has no src until the visitor
- * accepts cookies. CookieConsent.astro shows it and sets the src on accept, and hides it again on reject.
+ * Google Maps embed with a directions link.
+ *
+ * Google can set cookies, so the map box shows only when <html data-consent="accepted"> (CSS in tailwind.css),
+ * and CookieConsent.astro sets the iframe src only after acceptance. The attribute is set in <head> before the
+ * page draws, so a returning visitor who accepted sees the map space at once, without a layout shift.
+ * The "Open in Google Maps" link is an ordinary link and is always shown, also when cookies are rejected.
  */
 import { BUSINESS } from '~/utils/site';
 
@@ -12,8 +16,8 @@ export interface Props {
 const { class: className = '' } = Astro.props;
 ---
 
-<figure class:list={['not-prose hidden', className]} data-consent-map>
-  <div class="swatch overflow-hidden border border-gold/60 bg-sand">
+<figure class:list={['not-prose', className]} data-consent-map>
+  <div class="swatch overflow-hidden border border-gold/60 bg-sand mb-3" data-consent-map-frame>
     <iframe
       data-src={BUSINESS.map.embed}
       title={`Map showing ${BUSINESS.name} at ${BUSINESS.address.join(', ')}`}
@@ -22,7 +26,7 @@ const { class: className = '' } = Astro.props;
       referrerpolicy="no-referrer-when-downgrade"
       allowfullscreen></iframe>
   </div>
-  <figcaption class="mt-3 text-right">
+  <figcaption class="text-right">
     <a
       href={BUSINESS.map.link}
       target="_blank"

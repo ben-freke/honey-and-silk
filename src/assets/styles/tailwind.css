@@ -10,9 +10,26 @@
     font-synthesis: none;
   }
 
+  /*
+   * Keyboard focus. Chocolate on light surfaces (13:1 on cream, 11:1 on sand) and cream on chocolate surfaces.
+   * In forced-colours mode the browser replaces the colour with a system colour, so the outline stays visible.
+   */
   :focus-visible {
-    outline: 2px solid rgb(var(--hs-gold));
+    outline: 3px solid rgb(var(--hs-chocolate));
     outline-offset: 3px;
+  }
+  .on-dark :focus-visible {
+    outline-color: rgb(var(--hs-cream));
+  }
+
+  /* Long words (email addresses, script headings at large text sizes) wrap instead of widening the page. */
+  body {
+    overflow-wrap: break-word;
+  }
+
+  /* Keep anchor targets and focused elements clear of the sticky header. */
+  html {
+    scroll-padding-top: var(--header-h, 81px);
   }
 }
 
@@ -40,12 +57,12 @@
    * Use mocha on light backgrounds. Use gold on chocolate.
    */
   .eyebrow {
-    @apply inline-flex items-center gap-4 font-sans text-xs md:text-sm font-medium uppercase tracking-[0.3em] text-mocha;
+    @apply inline-flex max-w-full flex-wrap items-center justify-center gap-x-4 gap-y-1 font-sans text-xs md:text-sm font-medium uppercase tracking-[0.3em] text-mocha [overflow-wrap:anywhere];
   }
   .eyebrow::before,
   .eyebrow::after {
     content: '';
-    @apply block h-px w-8 md:w-12 bg-gold;
+    @apply block h-px w-8 shrink-0 md:w-12 bg-gold;
   }
 
   /* Card shape from the palette swatches: large radius on one side. */
@@ -54,7 +71,7 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center rounded-full border border-chocolate bg-transparent font-sans font-medium text-center text-sm uppercase tracking-[0.15em] text-chocolate leading-snug transition py-3.5 px-7 md:px-8 ease-in duration-200 hover:bg-chocolate hover:text-cream cursor-pointer;
+    @apply inline-flex items-center justify-center rounded-full border border-chocolate bg-transparent font-sans font-medium text-center text-sm uppercase tracking-[0.15em] text-chocolate leading-snug transition py-3.5 px-5 sm:px-7 md:px-8 [overflow-wrap:anywhere] ease-in duration-200 hover:bg-chocolate hover:text-cream cursor-pointer;
   }
 
   .btn-primary {
@@ -78,49 +95,18 @@
   }
 }
 
-#header.expanded nav {
-  position: fixed;
-  top: 81px;
-  left: 0;
-  right: 0;
-  bottom: 70px !important;
-  padding: 0 5px;
-  background-color: var(--aw-color-bg-page);
+/* Google Maps box: shown only after the visitor accepts cookies. See LocationMap.astro. */
+[data-consent-map-frame] {
+  display: none;
+}
+:root[data-consent='accepted'] [data-consent-map-frame] {
+  display: block;
 }
 
 #header.scroll > div:first-child {
   box-shadow: 0 1px 0 rgb(var(--hs-gold) / 0.5);
 }
 
-.dropdown:focus .dropdown-menu,
-.dropdown:focus-within .dropdown-menu,
-.dropdown:hover .dropdown-menu {
-  display: block;
-}
-
-[astro-icon].icon-light > * {
-  stroke-width: 1.2;
-}
-
-[astro-icon].icon-bold > * {
-  stroke-width: 2.4;
-}
-
-[data-aw-toggle-menu] path {
-  @apply transition;
-}
-[data-aw-toggle-menu].expanded g > path:first-child {
-  @apply -rotate-45 translate-y-[15px] translate-x-[-3px];
-}
-
-[data-aw-toggle-menu].expanded g > path:last-child {
-  @apply rotate-45 translate-y-[-8px] translate-x-[14px];
-}
-
 .aw-link-active {
   @apply text-chocolate underline decoration-gold decoration-2 underline-offset-8;
-}
-
-.dd *:first-child {
-  margin-top: 0;
 }

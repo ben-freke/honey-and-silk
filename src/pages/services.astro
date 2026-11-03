@@ -17,14 +17,14 @@ const metadata = { title: 'Services' };
   <section class="max-w-5xl mx-auto px-4 sm:px-6 pb-20 md:pb-28 grid gap-6 md:grid-cols-2">
     {
       SERVICES.map((service) => (
-        <div class="swatch bg-sand p-8 md:p-10">
-          <h2 class="font-heading text-5xl leading-[1.1] mb-2">{service.title}</h2>
+        <div class="swatch bg-sand min-w-0 p-6 sm:p-8 md:p-10 [overflow-wrap:anywhere]">
+          <h2 class="font-heading text-4xl sm:text-5xl leading-[1.1] mb-2">{service.title}</h2>
           <p class="font-light text-chocolate/90 mb-6">{service.description}</p>
           <ul class="divide-y divide-gold/50">
             {service.items.map((item: { name: string; price: string }) => (
-              <li class="flex justify-between gap-4 py-3">
+              <li class="flex flex-wrap justify-between gap-x-4 py-3">
                 <span class="font-light">{item.name}</span>
-                <span class="font-medium whitespace-nowrap">{item.price}</span>
+                <span class="font-medium">{item.price}</span>
               </li>
             ))}
           </ul>

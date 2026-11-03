@@ -103,6 +103,12 @@ export const getSizes = (width?: number, layout?: Layout): string | undefined =>
     case `fullWidth`:
       return `100vw`;
 
+    // Layouts that fill their container: assume the full viewport width unless the caller gives exact `sizes`.
+    case `cover`:
+    case `responsive`:
+    case `contained`:
+      return `100vw`;
+
     default:
       return undefined;
   }
@@ -325,6 +331,11 @@ export async function getImagesOptimized(
   }
 
   let breakpoints = getBreakpoints({ width: width, breakpoints: widths, layout: layout });
+  // Never generate candidates wider than the source image (the device list goes up to 6016px).
+  const sourceWidth = typeof image === 'string' ? undefined : Number(image.width) || undefined;
+  if (sourceWidth) {
+    breakpoints = breakpoints.map((w) => Math.min(w, sourceWidth));
+  }
   breakpoints = [...new Set(breakpoints)].sort((a, b) => a - b);
 
   const srcset = (await transform(image, breakpoints, Number(width) || undefined, Number(height) || undefined, format))

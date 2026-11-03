@@ -67,7 +67,7 @@ const metadata = {
   <!-- Visit: address and opening hours. -->
   <section class="not-prose">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 pb-20 md:pb-28">
-      <div class="swatch border border-gold/60 grid md:grid-cols-2 gap-10 p-8 md:p-14">
+      <div class="swatch border border-gold/60 grid md:grid-cols-2 gap-10 p-6 sm:p-8 lg:p-14 [overflow-wrap:anywhere]">
         <div>
           <p class="eyebrow mb-4">Find us</p>
           <h2 class="font-heading text-5xl md:text-6xl leading-[1.1] mb-6">Visit the salon</h2>
@@ -82,7 +82,7 @@ const metadata = {
               BUSINESS.openingHours.map((h) => (
                 <div class="flex justify-between gap-4 py-3">
                   <dt class="font-medium">{h.days}</dt>
-                  <dd class="font-light text-right">{h.hours}</dd>
+                  <dd class="min-w-0 font-light text-right">{h.hours}</dd>
                 </div>
               ))
             }

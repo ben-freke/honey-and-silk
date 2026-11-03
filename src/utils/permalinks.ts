@@ -42,14 +42,13 @@ export const getCanonical = (path = ''): string | URL => {
 export const getPermalink = (slug = '', type = 'page'): string => {
   let permalink: string;
 
-  if (
-    slug.startsWith('https://') ||
-    slug.startsWith('http://') ||
-    slug.startsWith('://') ||
-    slug.startsWith('#') ||
-    slug.startsWith('javascript:')
-  ) {
+  // External and in-page links pass through unchanged. Only safe schemes are allowed: a `javascript:` (or other
+  // script-capable) URL is never returned as a link.
+  if (/^(https?:\/\/|mailto:|tel:|#)/i.test(slug)) {
     return slug;
+  }
+  if (/^[a-z][a-z0-9+.-]*:/i.test(slug.trim()) || slug.startsWith('//')) {
+    throw new Error(`getPermalink: unsupported URL scheme in "${slug}"`);
   }
 
   switch (type) {

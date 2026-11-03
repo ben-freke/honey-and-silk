@@ -6,7 +6,6 @@ import { I18N } from 'astrowind:config';
 import CommonMeta from '~/components/common/CommonMeta.astro';
 import Favicons from '~/components/Favicons.astro';
 import CustomStyles from '~/components/CustomStyles.astro';
-import ApplyColorMode from '~/components/common/ApplyColorMode.astro';
 import Metadata from '~/components/common/Metadata.astro';
 import BasicScripts from '~/components/common/BasicScripts.astro';
 import CookieConsent from '~/components/common/CookieConsent.astro';
@@ -15,12 +14,15 @@ import CookieConsent from '~/components/common/CookieConsent.astro';
 import { ClientRouter } from 'astro:transitions';
 
 import type { MetaData as MetaDataType } from '~/types';
+import { IS_PREVIEW } from '~/utils/deploy';
 
 export interface Props {
   metadata?: MetaDataType;
 }
 
-const { metadata = {} } = Astro.props;
+const { metadata: pageMetadata = {} } = Astro.props;
+// Pull request previews must not be indexed by search engines.
+const metadata: MetaDataType = IS_PREVIEW ? { ...pageMetadata, robots: { index: false, follow: false } } : pageMetadata;
 const { language, textDirection } = I18N;
 ---
 
@@ -30,7 +32,30 @@ const { language, textDirection } = I18N;
     <CommonMeta />
     <Favicons />
     <CustomStyles />
-    <ApplyColorMode />
+    <!--
+      Read the saved cookie choice before the page draws, so the map space is reserved at once (no layout shift).
+      ClientRouter copies <html> attributes from each new page, so the value is set again after every swap.
+    -->
+    <script is:inline>
+      (function () {
+        function applyConsentAttribute() {
+          let value = null;
+          try {
+            value = window.localStorage.getItem('hs-cookie-consent');
+          } catch {
+            value = null;
+          }
+          if (window.__hsConsentSession) value = window.__hsConsentSession;
+          if (value === 'accepted' || value === 'rejected') document.documentElement.dataset.consent = value;
+          else delete document.documentElement.dataset.consent;
+        }
+        applyConsentAttribute();
+        if (!window.__hsConsentAttrBound) {
+          window.__hsConsentAttrBound = true;
+          document.addEventListener('astro:after-swap', applyConsentAttribute);
+        }
+      })();
+    </script>
     <Metadata {...metadata} />
 
     <!-- Comment the line below to disable View Transitions -->

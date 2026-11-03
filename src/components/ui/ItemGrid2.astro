@@ -67,7 +67,8 @@ const {
                   set:html={description}
                 />
               )}
-              {callToAction && (
+              {/* A card that is itself a link cannot contain another link, so only plain cards get an action. */}
+              {callToAction && !href && (
                 <div class="mt-2">
                   <Button {...callToAction} />
                 </div>

@@ -13,10 +13,8 @@ export const headerData = {
 export const footerData = {
   links: [],
   secondaryLinks: [],
-  socialLinks: [
-    // TODO: add the salon's real social links.
-    { ariaLabel: 'Instagram', icon: 'tabler:brand-instagram', href: '#' },
-    { ariaLabel: 'Facebook', icon: 'tabler:brand-facebook', href: '#' },
-  ],
+  // Add the salon's social links here when the accounts exist, for example:
+  // { ariaLabel: 'Instagram', icon: 'tabler:brand-instagram', href: 'https://www.instagram.com/<account>/' },
+  socialLinks: [] as Array<{ ariaLabel: string; icon: string; href: string }>,
   footNote: `© ${new Date().getFullYear()} Honey & Silk Hair. All rights reserved.`,
 };

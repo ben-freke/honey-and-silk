@@ -28,8 +28,8 @@ const pages = [
 ---
 
 <footer class="on-dark bg-chocolate text-cream not-prose">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-16 pb-10 grid gap-10 md:grid-cols-4 text-sm">
-    <div class="md:col-span-1">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-16 pb-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+    <div>
       <Image src={logoDark} alt={`${BUSINESS.name} logo`} width={220} class="w-[5.5rem] h-auto" />
     </div>
     <div>
@@ -52,7 +52,7 @@ const pages = [
         }
       </ul>
     </div>
-    <div>
+    <div class="min-w-0">
       <p class="text-xs uppercase tracking-[0.3em] text-gold mb-4">Get in touch</p>
       <ul class="space-y-2">
         <li>
@@ -61,22 +61,31 @@ const pages = [
           >
         </li>
         <li>
-          <a class="hover:text-sand hover:underline underline-offset-4" href={`mailto:${BUSINESS.email}`}
-            >{BUSINESS.email}</a
+          <a
+            class="hover:text-sand hover:underline underline-offset-4 [overflow-wrap:anywhere]"
+            href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a
           >
         </li>
       </ul>
-      <ul class="flex gap-4 mt-5">
-        {
-          socialLinks.map((s) => (
-            <li>
-              <a href={s.href} aria-label={s.ariaLabel} class="text-gold hover:text-cream transition-colors">
-                {s.icon && <Icon name={s.icon} class="w-5 h-5" />}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+      {
+        socialLinks.length > 0 && (
+          <ul class="flex gap-4 mt-5">
+            {socialLinks.map((social) => (
+              <li>
+                <a
+                  href={social.href}
+                  aria-label={social.ariaLabel}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-gold hover:text-cream transition-colors"
+                >
+                  {social.icon && <Icon name={social.icon} class="w-5 h-5" />}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
     </div>
   </div>
   <div class="max-w-6xl mx-auto px-4 sm:px-6">

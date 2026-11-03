@@ -1,111 +1,168 @@
 ---
+/*
+ * Contact form.
+ *
+ * The form sends to PUBLIC_FORM_ENDPOINT (for example a Formspree form URL). The endpoint is checked at build time:
+ * if it is missing or is not an https:// URL, the page shows a clear "not open yet" message with the phone number
+ * and email address instead of a form that cannot send.
+ *
+ * Submission uses one delegated `submit` listener, bound once, so it keeps working after Astro view-transition
+ * navigation replaces the page. Each form has its own status line, which is a live region.
+ * Client-side checks only help the visitor. The form provider must also enforce validation, limits and spam controls.
+ */
 import type { Form as Props } from '~/types';
 import Button from '~/components/ui/Button.astro';
+import { BUSINESS } from '~/utils/site';
 
 const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } = Astro.props;
-const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT || '';
+
+const rawEndpoint = (import.meta.env.PUBLIC_FORM_ENDPOINT ?? '').trim();
+const endpoint = (() => {
+  try {
+    const url = new URL(rawEndpoint);
+    return url.protocol === 'https:' ? url.href : '';
+  } catch {
+    return '';
+  }
+})();
+
+const fieldClass =
+  'py-3 px-4 block w-full text-md rounded-lg border border-mocha/50 bg-cream placeholder:text-muted focus:border-chocolate focus:ring-1 focus:ring-chocolate';
+const labelClass = 'block mb-2 text-xs font-medium uppercase tracking-[0.2em]';
 ---
 
-<form action={endpoint} method="POST" data-formspree>
-  <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
-  {
-    inputs &&
-      inputs.map(
-        ({ type = 'text', name, label = '', autocomplete = 'on', placeholder = '' }) =>
-          name && (
-            <div class="mb-6">
-              {label && (
-                <label for={name} class="block mb-2 text-xs font-medium uppercase tracking-[0.2em]">
-                  {label}
-                </label>
-              )}
-              <input
-                type={type}
-                name={name}
-                id={name}
-                autocomplete={autocomplete}
-                placeholder={placeholder}
-                class="py-3 px-4 block w-full text-md rounded-lg border border-mocha/50 bg-cream placeholder:text-muted focus:border-chocolate focus:ring-1 focus:ring-chocolate"
-              />
-            </div>
-          )
-      )
-  }
+{
+  endpoint ? (
+    <form action={endpoint} method="POST" data-contact-form novalidate>
+      <input type="text" name="_gotcha" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      {inputs &&
+        inputs.map(
+          ({ type = 'text', name, label = '', autocomplete = 'on', placeholder = '', required = false, maxlength }) =>
+            name && (
+              <div class="mb-6">
+                {label && (
+                  <label for={name} class={labelClass}>
+                    {label}
+                    {!required && <span class="normal-case tracking-normal font-light"> (optional)</span>}
+                  </label>
+                )}
+                <input
+                  type={type}
+                  name={name}
+                  id={name}
+                  autocomplete={autocomplete}
+                  placeholder={placeholder}
+                  required={required}
+                  maxlength={maxlength}
+                  class={fieldClass}
+                />
+              </div>
+            )
+        )}
 
-  {
-    textarea && (
-      <div>
-        <label for="textarea" class="block mb-2 text-xs font-medium uppercase tracking-[0.2em]">
-          {textarea.label}
-        </label>
-        <textarea
-          id="textarea"
-          name={textarea.name ? textarea.name : 'message'}
-          rows={textarea.rows ? textarea.rows : 4}
-          placeholder={textarea.placeholder}
-          class="py-3 px-4 block w-full text-md rounded-lg border border-mocha/50 bg-cream placeholder:text-muted focus:border-chocolate focus:ring-1 focus:ring-chocolate"
-        />
-      </div>
-    )
-  }
+      {textarea && (
+        <div>
+          <label for="message" class={labelClass}>
+            {textarea.label}
+          </label>
+          <textarea
+            id="message"
+            name={textarea.name ? textarea.name : 'message'}
+            rows={textarea.rows ? textarea.rows : 4}
+            placeholder={textarea.placeholder}
+            required={textarea.required ?? false}
+            maxlength={textarea.maxlength}
+            class={fieldClass}
+          />
+        </div>
+      )}
 
-  {disclaimer && <div class="mt-3 text-sm text-muted" set:html={disclaimer.label} />}
+      {disclaimer && <div class="mt-3 text-sm text-muted" set:html={disclaimer.label} />}
 
-  {
-    button && (
-      <div class="mt-10 grid">
-        <Button variant="primary" type="submit">
-          {button}
-        </Button>
-      </div>
-    )
-  }
+      {button && (
+        <div class="mt-10 grid">
+          <Button variant="primary" type="submit" data-submit>
+            {button}
+          </Button>
+        </div>
+      )}
 
-  {
-    description && (
-      <div class="mt-3 text-center">
-        <p class="text-sm text-muted">{description}</p>
-      </div>
-    )
-  }
+      {description && (
+        <div class="mt-3 text-center">
+          <p class="text-sm text-muted">{description}</p>
+        </div>
+      )}
 
-  <div class="mt-3 text-center">
-    <p class="text-sm text-muted" data-form-status></p>
-  </div>
-</form>
+      <p class="mt-4 text-center text-sm" role="status" aria-live="polite" data-form-status />
+    </form>
+  ) : (
+    <div class="text-center" data-form-unavailable>
+      <p class="text-lg font-light">Online messages are not open yet.</p>
+      <p class="mt-3 font-light">
+        Please call us on{' '}
+        <a class="underline underline-offset-4" href={`tel:${BUSINESS.phoneHref}`}>
+          {BUSINESS.phoneDisplay}
+        </a>{' '}
+        or email{' '}
+        <a class="underline underline-offset-4 [overflow-wrap:anywhere]" href={`mailto:${BUSINESS.email}`}>
+          {BUSINESS.email}
+        </a>
+        .
+      </p>
+    </div>
+  )
+}
 
 <script>
-  const form = document.querySelector<HTMLFormElement>('form[data-formspree]');
-  const status = document.querySelector('[data-form-status]');
+  const MESSAGES = {
+    invalid: 'Please fill in the fields marked as required, and check your email address.',
+    sending: 'Sending your message…',
+    sent: 'Thank you. Your message has been sent, and we will reply soon.',
+    failed: 'Sorry, your message was not sent. Please try again, or call or email us.',
+  };
 
-  if (form && status) {
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
+  // One delegated listener for the whole session, so forms on pages loaded by view transitions also work.
+  document.addEventListener('submit', async (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement) || !form.matches('[data-contact-form]')) return;
+    event.preventDefault();
 
-      const formData = new FormData(form);
-      if (!form.action || form.action === window.location.href) {
-        status.textContent = 'The form is not connected yet.';
-        return;
-      }
+    // Ignore repeat clicks while a request is in flight.
+    if (form.dataset.pending === 'true') return;
 
-      status.textContent = 'Sending...';
+    const status = form.querySelector<HTMLElement>('[data-form-status]');
+    const submit = form.querySelector<HTMLButtonElement>('[data-submit]');
+    const setStatus = (text: string) => {
+      if (status) status.textContent = text;
+    };
 
-      try {
-        const response = await fetch(form.action, {
-          method: 'POST',
-          body: formData,
-          headers: { Accept: 'application/json' },
-        });
+    if (!form.checkValidity()) {
+      setStatus(MESSAGES.invalid);
+      form.querySelector<HTMLElement>(':invalid')?.focus();
+      return;
+    }
 
-        if (response.ok) {
-          form.reset();
-          status.textContent = 'Thanks! Your message has been sent.';
-        } else {
-          status.textContent = 'Something went wrong. Please try again.';
-        }
-      } catch {
-        status.textContent = 'Something went wrong. Please try again.';
-      }
-    });
-  }
+    form.dataset.pending = 'true';
+    submit?.setAttribute('disabled', '');
+    form.setAttribute('aria-busy', 'true');
+    setStatus(MESSAGES.sending);
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      form.reset();
+      setStatus(MESSAGES.sent);
+    } catch {
+      // Keep what the visitor typed, so they can try again.
+      setStatus(MESSAGES.failed);
+    } finally {
+      delete form.dataset.pending;
+      submit?.removeAttribute('disabled');
+      form.removeAttribute('aria-busy');
+    }
+  });
 </script>

@@ -22,8 +22,8 @@ export const BUSINESS = {
   ],
 } as const;
 
-// Google Analytics 4 measurement ID. PUBLIC_GA_MEASUREMENT_ID overrides it; set that to an empty string to turn
-// analytics off. Analytics is only in production builds, and loads only after the visitor accepts analytics cookies.
+// Google Analytics 4 measurement ID. Used only by the Cloudflare production build of main; see src/utils/deploy.ts.
+// Analytics loads only after the visitor accepts cookies.
 export const GA_MEASUREMENT_ID = 'G-0JEDELNDEM';
 
 export const SERVICES = [

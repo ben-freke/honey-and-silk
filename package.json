@@ -4,7 +4,7 @@
   "description": "Website for Honey & Silk hair salon.",
   "type": "module",
   "engines": {
-    "node": "^18.17.1 || ^20.3.0 || >= 21.0.0"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "dev": "astro dev",
@@ -15,6 +15,7 @@
     "deploy": "astro build && wrangler deploy",
     "astro": "astro",
     "check": "npm run check:astro && npm run check:eslint && npm run check:prettier",
+    "test:e2e": "playwright test",
     "check:astro": "astro check",
     "check:eslint": "eslint .",
     "check:prettier": "prettier --check .",
@@ -36,18 +37,16 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@astrojs/mdx": "^4.3.3",
-    "@astrojs/partytown": "^2.1.4",
     "@astrojs/tailwind": "^5.1.5",
     "@eslint/js": "^9.33.0",
-    "@iconify-json/flat-color-icons": "^1.2.1",
     "@iconify-json/tabler": "^1.2.20",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/typography": "^0.5.16",
     "@types/js-yaml": "^4.0.9",
     "@types/lodash.merge": "^4.6.9",
     "@types/mdx": "^2.0.13",
     "@typescript-eslint/eslint-plugin": "^8.39.0",
     "@typescript-eslint/parser": "^8.39.0",
-    "astro-compress": "2.3.8",
     "astro-eslint-parser": "^1.2.2",
     "eslint": "^9.33.0",
     "eslint-plugin-astro": "^1.3.1",
@@ -57,7 +56,7 @@
     "prettier": "^3.6.2",
     "prettier-plugin-astro": "^0.14.1",
     "reading-time": "^1.5.0",
-    "sharp": "0.34.3",
+    "sharp": "^0.34.5",
     "tailwind-merge": "^2.6.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",

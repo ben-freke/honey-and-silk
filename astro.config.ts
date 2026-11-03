@@ -6,20 +6,14 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
-import partytown from '@astrojs/partytown';
 import icon from 'astro-icon';
-import compress from 'astro-compress';
-import type { AstroIntegration } from 'astro';
 
 import astrowind from './vendor/integration';
+import csp from './src/integrations/csp';
 
 import { readingTimeRemarkPlugin, responsiveTablesRehypePlugin, lazyImagesRehypePlugin } from './src/utils/frontmatter';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const hasExternalScripts = false;
-const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroIntegration)[] = []) =>
-  hasExternalScripts ? (Array.isArray(items) ? items.map((item) => item()) : [items()]) : [];
 
 export default defineConfig({
   site: 'https://honeyandsilk.co.uk',
@@ -41,48 +35,18 @@ export default defineConfig({
     mdx(),
     icon({
       include: {
-        tabler: ['*'],
-        'flat-color-icons': [
-          'template',
-          'gallery',
-          'approval',
-          'document',
-          'advertising',
-          'currency-exchange',
-          'voice-presentation',
-          'business-contact',
-          'database',
-        ],
+        // Only the icons the site uses: service cards, and social links for when they are added.
+        tabler: ['scissors', 'palette', 'droplet', 'sparkles', 'brand-instagram', 'brand-facebook'],
       },
-    }),
-
-    ...whenExternalScripts(() =>
-      partytown({
-        config: { forward: ['dataLayer.push'] },
-      })
-    ),
-
-    compress({
-      CSS: true,
-      HTML: {
-        'html-minifier-terser': {
-          removeAttributeQuotes: false,
-        },
-      },
-      Image: false,
-      JavaScript: true,
-      SVG: false,
-      Logger: 1,
     }),
 
     astrowind({
       config: './src/config.yaml',
     }),
-  ],
 
-  image: {
-    domains: ['cdn.pixabay.com'],
-  },
+    // Must run last: it hashes the final HTML. Report-only until a deployed preview shows no violations.
+    csp({ enforce: false, formEndpoint: process.env.PUBLIC_FORM_ENDPOINT }),
+  ],
 
   markdown: {
     remarkPlugins: [readingTimeRemarkPlugin],

@@ -14,6 +14,10 @@ declare global {
 
   interface Window {
     dataLayer?: unknown[];
+    /** Cookie choice made in this tab ("accepted" or "rejected"); wins over localStorage. */
+    __hsConsentSession?: string;
+    /** Guard so the <head> consent script binds its view-transition listener once. */
+    __hsConsentAttrBound?: boolean;
     gtag?: (...args: unknown[]) => void;
     /** Google Analytics opt-out flag, one per measurement ID: window['ga-disable-G-XXXX'] = true. */
     [key: `ga-disable-${string}`]: boolean | undefined;

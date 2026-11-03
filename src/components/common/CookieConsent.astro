@@ -2,30 +2,29 @@
 /*
  * Cookie consent banner: one choice, "Accept cookies" or "Reject cookies".
  *
- *   Accept: loads Google Analytics 4 (GA_MEASUREMENT_ID in src/utils/site.ts) and shows the Google Maps embed.
+ *   Accept: loads Google Analytics 4 (ANALYTICS_ID in src/utils/deploy.ts) and shows the Google Maps embed.
  *   Reject: closes the banner. Google Analytics stays off (and its cookies are deleted), and the map is hidden.
  * Until the visitor chooses, neither loads. The page stays usable behind the banner.
  *
- * The choice is kept in localStorage under CONSENT_KEY ("accepted" or "rejected").
+ * The choice is kept in localStorage under CONSENT_KEY ("accepted" or "rejected"), and mirrored on
+ * <html data-consent> so CSS can reserve the map space before the page draws (see Layout.astro).
+ * A choice made in this tab wins over the stored value, so Reject works even when storage writes fail.
+ * Choices made in another tab are applied here through the `storage` event.
  * Any element with [data-cookie-settings] opens the banner again, so the visitor can change their choice.
  */
 import { getPermalink } from '~/utils/permalinks';
-import { GA_MEASUREMENT_ID } from '~/utils/site';
-
-const gaId = (import.meta.env.PUBLIC_GA_MEASUREMENT_ID ?? GA_MEASUREMENT_ID).trim();
-// Only production builds send data, so `npm run dev` does not add test visits to the reports.
-const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
+import { ANALYTICS_ID } from '~/utils/deploy';
 ---
 
 <div
   id="cookie-consent"
-  class="on-dark fixed inset-x-0 bottom-0 z-50 hidden px-4 pb-4 sm:px-6 sm:pb-6"
+  class="on-dark fixed inset-x-0 bottom-0 z-50 hidden px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
   role="region"
   aria-label="Cookies"
-  data-ga-id={hasAnalytics ? gaId : undefined}
+  data-ga-id={ANALYTICS_ID || undefined}
 >
   <div
-    class="mx-auto max-w-3xl rounded-r-[2.5rem] rounded-l-lg bg-chocolate text-cream px-6 py-5 md:px-8 shadow-[0_8px_40px_rgb(59_42_32/0.35)] md:flex md:items-center md:gap-8"
+    class="mx-auto max-h-[60dvh] overflow-y-auto max-w-3xl rounded-r-[2.5rem] rounded-l-lg bg-chocolate text-cream px-6 py-5 md:px-8 shadow-[0_8px_40px_rgb(59_42_32/0.35)] md:flex md:items-center md:gap-8"
   >
     <p class="text-sm font-light leading-relaxed text-sand md:flex-1">
       We use cookies on this website. Check our <a
@@ -54,15 +53,21 @@ const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
     }
   }
 
-  // Keep the choice in memory too, so it still works for this page view when storage is blocked.
+  // The choice made in this tab. It wins over the stored value, so a Reject still applies when storage reads
+  // succeed but writes fail. It is mirrored on window so the inline <head> script in Layout.astro can read it.
   let sessionConsent: Consent = null;
 
+  function setSessionConsent(value: Consent) {
+    sessionConsent = value;
+    window.__hsConsentSession = value ?? undefined;
+  }
+
   function currentConsent(): Consent {
-    return readConsent() ?? sessionConsent;
+    return sessionConsent ?? readConsent();
   }
 
   function saveConsent(value: Exclude<Consent, null>) {
-    sessionConsent = value;
+    setSessionConsent(value);
     try {
       window.localStorage.setItem(CONSENT_KEY, value);
     } catch {
@@ -74,8 +79,20 @@ const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
     return document.getElementById('cookie-consent');
   }
 
+  // Publish the banner height as --cookie-banner-h, so the mobile menu can keep its links above the banner.
+  let bannerResize: ResizeObserver | null = null;
+
   function showBanner(show: boolean) {
-    banner()?.classList.toggle('hidden', !show);
+    const el = banner();
+    el?.classList.toggle('hidden', !show);
+    bannerResize?.disconnect();
+    const root = document.documentElement;
+    if (show && el) {
+      bannerResize = new ResizeObserver(() => root.style.setProperty('--cookie-banner-h', `${el.offsetHeight}px`));
+      bannerResize.observe(el);
+    } else {
+      root.style.setProperty('--cookie-banner-h', '0px');
+    }
   }
 
   // ---- Google Analytics -------------------------------------------------------------------------------------
@@ -129,16 +146,14 @@ const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
 
   // ---- Google Maps ------------------------------------------------------------------------------------------
 
-  // Show and load the map only after the visitor accepts. Otherwise hide it and remove its src.
+  // The map box is shown by CSS from <html data-consent="accepted">. Load the iframe only after acceptance,
+  // and remove its src again on reject so nothing more is sent to Google.
   function applyMaps(accepted: boolean) {
-    document.querySelectorAll<HTMLElement>('[data-consent-map]').forEach((map) => {
-      const frame = map.querySelector<HTMLIFrameElement>('iframe[data-src]');
+    document.querySelectorAll<HTMLIFrameElement>('[data-consent-map] iframe[data-src]').forEach((frame) => {
       if (accepted) {
-        if (frame && !frame.getAttribute('src')) frame.setAttribute('src', frame.dataset.src ?? '');
-        map.classList.remove('hidden');
+        if (!frame.getAttribute('src')) frame.setAttribute('src', frame.dataset.src ?? '');
       } else {
-        frame?.removeAttribute('src');
-        map.classList.add('hidden');
+        frame.removeAttribute('src');
       }
     });
   }
@@ -146,7 +161,10 @@ const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
   // ---- Apply and choose -------------------------------------------------------------------------------------
 
   function applyConsent() {
-    const accepted = currentConsent() === 'accepted';
+    const consent = currentConsent();
+    const accepted = consent === 'accepted';
+    if (consent) document.documentElement.dataset.consent = consent;
+    else delete document.documentElement.dataset.consent;
     const id = banner()?.dataset.gaId ?? '';
     if (id) {
       if (accepted) loadAnalytics(id);
@@ -173,6 +191,14 @@ const hasAnalytics = import.meta.env.PROD && /^G-[A-Z0-9]+$/.test(gaId);
       showBanner(true);
       banner()?.querySelector<HTMLElement>('[data-cookie-choice]')?.focus();
     }
+  });
+
+  // Another tab changed the choice: apply it here too.
+  window.addEventListener('storage', (event) => {
+    if (event.key !== CONSENT_KEY) return;
+    setSessionConsent(null);
+    showBanner(currentConsent() === null);
+    applyConsent();
   });
 
   // Runs on the first load and after each view-transition navigation.

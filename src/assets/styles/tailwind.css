@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Great Vibes has one weight. Do not let the browser make a fake bold. */
+  .font-heading {
+    font-weight: 400;
+    letter-spacing: 0;
+    font-synthesis: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--hs-gold));
+    outline-offset: 3px;
+  }
+}
+
+@layer utilities {
+  .bg-page {
+    background-color: var(--aw-color-bg-page);
+  }
+  .bg-dark {
+    background-color: var(--aw-color-bg-page-dark);
+  }
+  .bg-light {
+    background-color: var(--aw-color-bg-page);
+  }
+  .text-page {
+    color: var(--aw-color-text-page);
+  }
+  .text-muted {
+    color: var(--aw-color-text-muted);
+  }
+}
+
+@layer components {
+  /*
+   * Eyebrow text. It copies the "HONEY & SILK HAIR" line in the logo: wide-tracked capitals between two rules.
+   * Use mocha on light backgrounds. Use gold on chocolate.
+   */
+  .eyebrow {
+    @apply inline-flex items-center gap-4 font-sans text-xs md:text-sm font-medium uppercase tracking-[0.3em] text-mocha;
+  }
+  .eyebrow::before,
+  .eyebrow::after {
+    content: '';
+    @apply block h-px w-8 md:w-12 bg-gold;
+  }
+
+  /* Card shape from the palette swatches: large radius on one side. */
+  .swatch {
+    @apply rounded-r-[2.5rem] rounded-l-lg;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-full border border-chocolate bg-transparent font-sans font-medium text-center text-sm uppercase tracking-[0.15em] text-chocolate leading-snug transition py-3.5 px-7 md:px-8 ease-in duration-200 hover:bg-chocolate hover:text-cream cursor-pointer;
+  }
+
+  .btn-primary {
+    @apply btn bg-chocolate text-cream hover:bg-mocha hover:border-mocha;
+  }
+
+  .btn-secondary {
+    @apply btn;
+  }
+
+  .btn-tertiary {
+    @apply btn border-none shadow-none text-mocha hover:bg-transparent hover:text-chocolate;
+  }
+
+  /* Buttons on chocolate sections. */
+  .on-dark .btn {
+    @apply border-cream text-cream hover:bg-cream hover:text-chocolate;
+  }
+  .on-dark .btn-primary {
+    @apply bg-cream text-chocolate border-cream hover:bg-sand hover:border-sand;
+  }
+}
+
+#header.expanded nav {
+  position: fixed;
+  top: 76px;
+  left: 0;
+  right: 0;
+  bottom: 70px !important;
+  padding: 0 5px;
+  background-color: var(--aw-color-bg-page);
+}
+
+#header.scroll > div:first-child {
+  box-shadow: 0 1px 0 rgb(var(--hs-gold) / 0.5);
+}
+
+.dropdown:focus .dropdown-menu,
+.dropdown:focus-within .dropdown-menu,
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+[astro-icon].icon-light > * {
+  stroke-width: 1.2;
+}
+
+[astro-icon].icon-bold > * {
+  stroke-width: 2.4;
+}
+
+[data-aw-toggle-menu] path {
+  @apply transition;
+}
+[data-aw-toggle-menu].expanded g > path:first-child {
+  @apply -rotate-45 translate-y-[15px] translate-x-[-3px];
+}
+
+[data-aw-toggle-menu].expanded g > path:last-child {
+  @apply rotate-45 translate-y-[-8px] translate-x-[14px];
+}
+
+.aw-link-active {
+  @apply text-chocolate underline decoration-gold decoration-2 underline-offset-8;
+}
+
+.dd *:first-child {
+  margin-top: 0;
+}

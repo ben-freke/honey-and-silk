@@ -1,0 +1,48 @@
+---
+/*
+ * Google Maps embed. Google can set cookies, so the iframe has no src until the visitor accepts cookies.
+ * CookieConsent.astro sets or removes the src when the visitor allows or refuses the "maps" purpose. Until then, the placeholder shows the address and a button.
+ */
+import { BUSINESS } from '~/utils/site';
+import { getPermalink } from '~/utils/permalinks';
+
+export interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<figure class:list={['not-prose', className]} data-consent-map>
+  <div class="swatch overflow-hidden border border-gold/60 bg-sand">
+    <iframe
+      data-src={BUSINESS.map.embed}
+      title={`Map showing ${BUSINESS.name} at ${BUSINESS.address.join(', ')}`}
+      class="hidden block w-full h-72 md:h-96 border-0"
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      allowfullscreen></iframe>
+    <div data-consent-placeholder class="flex h-72 md:h-96 flex-col items-center justify-center gap-4 p-6 text-center">
+      <p class="font-heading text-4xl md:text-5xl leading-none">{BUSINESS.name}</p>
+      <p class="font-light">{BUSINESS.address.join(', ')}</p>
+      <p class="max-w-md text-sm font-light">
+        The map comes from Google Maps, which can set cookies. See our <a
+          href={`${getPermalink('/privacy')}#cookies`}
+          class="underline underline-offset-4">privacy notice</a
+        >.
+      </p>
+      <button type="button" class="btn-primary py-3 px-6 text-xs" data-cookie-grant="maps">
+        Accept map cookies and show map
+      </button>
+    </div>
+  </div>
+  <figcaption class="mt-3 text-right">
+    <a
+      href={BUSINESS.map.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-xs uppercase tracking-[0.3em] underline decoration-chocolate/40 underline-offset-8 hover:decoration-chocolate"
+      >Open in Google Maps</a
+    >
+  </figcaption>
+</figure>

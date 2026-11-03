@@ -1,0 +1,14 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+
+const metadata = { title: 'Page not found', robots: { index: false } };
+---
+
+<Layout metadata={metadata}>
+  <Hero
+    title="Page not found"
+    subtitle="That page does not exist."
+    actions={[{ variant: 'primary', text: 'Back to home', href: '/' }]}
+  />
+</Layout>

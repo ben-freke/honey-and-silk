@@ -1,0 +1,14 @@
+// Cloudflare Pages config. Pages reads this file when it builds the site from GitHub.
+//
+// Deploys come from the Cloudflare Pages GitHub integration, set up in the Cloudflare dashboard:
+//   - Every pull request gets a preview deployment, and the Cloudflare app comments the preview URL on the PR.
+//   - A merge to main deploys to production.
+// Build settings in the dashboard: framework preset "Astro", build command `npm run build`, output directory `dist`.
+//
+// Pages applies public/_headers (copied to dist/_headers) and serves dist/404.html for unknown paths.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "honey-and-silk",
+  "compatibility_date": "2026-11-01",
+  "pages_build_output_dir": "./dist",
+}

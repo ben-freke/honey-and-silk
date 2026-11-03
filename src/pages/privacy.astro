@@ -1,0 +1,183 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+import { BUSINESS } from '~/utils/site';
+
+const metadata = {
+  title: 'Privacy notice',
+  description: `How ${BUSINESS.name} uses your personal data and cookies on this website.`,
+};
+
+const lastUpdated = '3 November 2026';
+---
+
+<Layout metadata={metadata}>
+  <Hero tagline="Your data" title="Privacy notice" subtitle={`Last updated: ${lastUpdated}`} />
+
+  <section
+    class="max-w-3xl mx-auto px-4 sm:px-6 pb-20 md:pb-28 prose prose-lg font-light prose-p:text-chocolate prose-li:text-chocolate prose-strong:text-chocolate prose-strong:font-medium prose-a:text-chocolate prose-a:underline-offset-4 prose-headings:font-heading prose-headings:font-normal prose-headings:text-chocolate prose-h2:text-5xl prose-h2:leading-[1.1] prose-h2:mb-4 prose-th:text-chocolate prose-th:font-medium prose-td:text-chocolate"
+  >
+    <p>
+      This notice tells you what personal data we collect when you use this website, why we collect it, and what your
+      rights are. It covers this website only.
+    </p>
+
+    <h2>Who we are</h2>
+    <p>
+      {BUSINESS.name} is a hair salon at {BUSINESS.address.join(', ')}. We are the controller of the personal data
+      described in this notice. If you have a question about your data, email us at <a href={`mailto:${BUSINESS.email}`}
+        >{BUSINESS.email}</a
+      > or write to us at the salon address.
+    </p>
+
+    <h2>What we collect</h2>
+    <ul>
+      <li>
+        <strong>When you send us a message</strong> with the contact form: your name, email address, phone number (if you
+        give it) and your message.
+      </li>
+      <li>
+        <strong>When you email or phone us</strong>: your contact details and what you tell us.
+      </li>
+      <li>
+        <strong>When you visit the website</strong>: our hosting provider records technical data, such as your IP
+        address, browser type and the pages you ask for. This is necessary to deliver the website and keep it secure.
+      </li>
+      <li>
+        <strong>If you accept analytics cookies</strong>: Google Analytics collects data about how you use the website,
+        such as the pages you visit, how long you stay, the type of device and browser, and your approximate location
+        (town or region). Google Analytics does not give us your name or contact details.
+      </li>
+    </ul>
+    <p>We do not use advertising tools, and we do not sell your data.</p>
+
+    <h2>Why we use it</h2>
+    <ul>
+      <li>
+        <strong>To answer your message and arrange appointments.</strong> Our lawful basis is that you asked us to do this
+        before you book with us, and our legitimate interest in replying to people who contact us.
+      </li>
+      <li>
+        <strong>To run the website and keep it secure.</strong> Our lawful basis is our legitimate interest in a website
+        that works and is safe.
+      </li>
+      <li>
+        <strong>To understand how people use the website, so that we can improve it.</strong> Our lawful basis is your consent.
+        You can withdraw it at any time in the cookie settings.
+      </li>
+    </ul>
+
+    <h2>Who we share it with</h2>
+    <p>We use these service providers. They process data for us only as needed to provide their service:</p>
+    <ul>
+      <li>
+        <strong>Cloudflare</strong> hosts this website and processes technical data such as IP addresses. See the <a
+          href="https://www.cloudflare.com/privacypolicy/"
+          target="_blank"
+          rel="noopener noreferrer">Cloudflare privacy policy</a
+        >.
+      </li>
+      <li>
+        <strong>Our contact form provider</strong> receives your form message and sends it to us by email.
+      </li>
+      <li>
+        <strong>Google</strong> provides Google Analytics and the map on our home and contact pages. Each one loads only
+        if you accept its cookies. See the <a
+          href="https://policies.google.com/privacy"
+          target="_blank"
+          rel="noopener noreferrer">Google privacy policy</a
+        >.
+      </li>
+    </ul>
+    <p>Some of these providers can process data outside the UK. When they do, they use legal safeguards for it.</p>
+
+    <h2>How long we keep it</h2>
+    <p>
+      We keep your messages only for as long as we need them to answer you and arrange your appointment. We then delete
+      them, and we do not keep them for more than 12 months.
+    </p>
+
+    <h2 id="cookies">Cookies</h2>
+    <p>We ask before we use any cookies that are not strictly necessary. You can accept or reject each type:</p>
+    <ul>
+      <li><strong>Analytics</strong>: Google Analytics, to count visits and see which pages are useful.</li>
+      <li><strong>Maps</strong>: Google Maps, to show where the salon is.</li>
+    </ul>
+    <p>
+      Our website also stores one setting in your browser to remember your choice. If you reject analytics cookies after
+      you accepted them, we stop Google Analytics and delete its cookies.
+    </p>
+    <div class="not-prose overflow-x-auto my-8">
+      <table class="w-full text-left text-base">
+        <thead>
+          <tr class="border-b border-gold">
+            <th class="py-3 pr-4 font-medium">Name</th>
+            <th class="py-3 pr-4 font-medium">Set by</th>
+            <th class="py-3 pr-4 font-medium">Purpose</th>
+            <th class="py-3 font-medium">Kept for</th>
+          </tr>
+        </thead>
+        <tbody class="font-light divide-y divide-gold/40">
+          <tr>
+            <td class="py-3 pr-4 align-top"><code class="text-sm">hs-cookie-consent</code></td>
+            <td class="py-3 pr-4 align-top">This website (browser storage)</td>
+            <td class="py-3 pr-4 align-top">Remembers which cookies you accepted or rejected. Strictly necessary.</td>
+            <td class="py-3 align-top">Until you clear your browser data</td>
+          </tr>
+          <tr>
+            <td class="py-3 pr-4 align-top"><code class="text-sm">_ga</code></td>
+            <td class="py-3 pr-4 align-top">Google Analytics</td>
+            <td class="py-3 pr-4 align-top"
+              >Tells visitors apart, so that we can count visits. Only if you accept analytics.</td
+            >
+            <td class="py-3 align-top">2 years</td>
+          </tr>
+          <tr>
+            <td class="py-3 pr-4 align-top"><code class="text-sm">_ga_&lt;ID&gt;</code></td>
+            <td class="py-3 pr-4 align-top">Google Analytics</td>
+            <td class="py-3 pr-4 align-top">Keeps the state of your visit. Only if you accept analytics.</td>
+            <td class="py-3 align-top">2 years</td>
+          </tr>
+          <tr>
+            <td class="py-3 pr-4 align-top">Google cookies</td>
+            <td class="py-3 pr-4 align-top">Google (Google Maps)</td>
+            <td class="py-3 pr-4 align-top">Set by Google when the map loads. Only if you accept maps.</td>
+            <td class="py-3 align-top">See Google's policy</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      You can change your choice at any time: <button
+        type="button"
+        data-cookie-settings
+        class="underline underline-offset-4 font-normal">open cookie settings</button
+      >.
+    </p>
+
+    <h2>Your rights</h2>
+    <p>Under UK data protection law, you have the right to:</p>
+    <ul>
+      <li>ask for a copy of your personal data</li>
+      <li>ask us to correct data that is wrong</li>
+      <li>ask us to delete your data</li>
+      <li>ask us to limit how we use your data</li>
+      <li>object to how we use your data</li>
+      <li>ask us to send your data to another organisation</li>
+    </ul>
+    <p>
+      To use any of these rights, email <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>. We reply within one
+      month.
+    </p>
+    <p>
+      If you are not happy with how we use your data, you can complain to the Information Commissioner's Office (ICO) at <a
+        href="https://ico.org.uk/make-a-complaint/"
+        target="_blank"
+        rel="noopener noreferrer">ico.org.uk</a
+      > or on 0303 123 1113. Please contact us first, so that we can try to help.
+    </p>
+
+    <h2>Changes to this notice</h2>
+    <p>If we change this notice, we put the new version on this page and change the date at the top.</p>
+  </section>
+</Layout>
